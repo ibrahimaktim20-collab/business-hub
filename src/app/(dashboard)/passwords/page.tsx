@@ -33,7 +33,7 @@ export default function PasswordsPage() {
     setLoading(true)
     const supabase = createClient()
     const { data } = await supabase
-      .from('password_entries').select('*').eq('company_id', company.id).order('site_name')
+      .from('passwords').select('*').eq('company_id', company.id).order('site_name')
     setEntries(data ?? [])
     setLoading(false)
   }
@@ -60,9 +60,9 @@ export default function PasswordsPage() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (editing) {
-      await supabase.from('password_entries').update({ ...form }).eq('id', editing.id)
+      await supabase.from('passwords').update({ ...form }).eq('id', editing.id)
     } else {
-      await supabase.from('password_entries').insert({ ...form, company_id: company.id, user_id: user!.id } as any)
+      await supabase.from('passwords').insert({ ...form, company_id: company.id, user_id: user!.id } as any)
     }
     setSaving(false)
     setOpen(false)
@@ -71,7 +71,7 @@ export default function PasswordsPage() {
 
   async function handleDelete(id: string) {
     const supabase = createClient()
-    await supabase.from('password_entries').delete().eq('id', id)
+    await supabase.from('passwords').delete().eq('id', id)
     setEntries(prev => prev.filter(e => e.id !== id))
   }
 
