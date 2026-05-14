@@ -12,7 +12,7 @@ import { createClient } from '@/lib/supabase/client'
 import { formatFileSize } from '@/lib/utils'
 import {
   FolderOpen, FolderPlus, Upload, Trash2,
-  ChevronRight, Home, Download, Search,
+  ChevronRight, Home, Download, Search, Eye, X,
 } from 'lucide-react'
 import type { FileFolder, FileItem } from '@/types/database'
 
@@ -21,6 +21,15 @@ const FILE_ICONS: Record<string, string> = {
   'application/pdf': '📄', 'application/zip': '🗜️',
   'text/': '📝', 'application/': '📦',
 }
+
+const OFFICE_TYPES = [
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.ms-powerpoint',
+]
 
 function getFileIcon(type: string) {
   for (const [prefix, icon] of Object.entries(FILE_ICONS)) {
@@ -32,6 +41,8 @@ function getFileIcon(type: string) {
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
+
+type ViewerState = { item: FileItem; url: string } | null
 
 export default function FilesPage() {
   const { activeCompany } = useCompany()
@@ -45,6 +56,7 @@ export default function FilesPage() {
   const [newFolderOpen, setNewFolderOpen] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [viewer, setViewer] = useState<ViewerState>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function load(folderId?: string) {
@@ -75,9 +87,7 @@ export default function FilesPage() {
 
   function navigateBreadcrumb(index: number) {
     if (index < 0) {
-      setCurrentFolder(null)
-      setBreadcrumbs([])
-      load()
+      setCurrentFolder(null); setBreadcrumbs([]); load()
     } else {
       const folder = breadcrumbs[index]
       setCurrentFolder(folder)
@@ -144,10 +154,25 @@ export default function FilesPage() {
     if (!data) return
     const url = URL.createObjectURL(data)
     const a = document.createElement('a')
-    a.href = url
-    a.download = item.name
-    a.click()
+    a.href = url; a.download = item.name; a.click()
     URL.revokeObjectURL(url)
+  }
+
+  async function viewFile(item: FileItem) {
+    const supabase = createClient()
+    const { data } = await supabase.storage.from('files').createSignedUrl(item.storage_path, 3600)
+    if (!data?.signedUrl) return
+    const url = data.signedUrl
+
+    if (OFFICE_TYPES.includes(item.type)) {
+      window.open(`https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`, '_blank')
+      return
+    }
+    if (item.type.startsWith('image/') || item.type === 'application/pdf' || item.type.startsWith('text/') || item.type.startsWith('video/')) {
+      setViewer({ item, url })
+      return
+    }
+    window.open(url, '_blank')
   }
 
   const filteredFolders = folders.filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
@@ -169,16 +194,15 @@ export default function FilesPage() {
       <div className="p-6 space-y-4">
         {/* Breadcrumb */}
         <div className="flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400">
-          <button onClick={() => navigateBreadcrumb(-1)} className="flex items-center gap-1 hover:text-zinc-900 transition-colors">
-            <Home className="h-3.5 w-3.5" />
-            <span>All Files</span>
+          <button onClick={() => navigateBreadcrumb(-1)} className="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+            <Home className="h-3.5 w-3.5" /><span>All Files</span>
           </button>
           {breadcrumbs.map((crumb, i) => (
             <span key={crumb.id} className="flex items-center gap-1">
               <ChevronRight className="h-3.5 w-3.5" />
               <button
                 onClick={() => navigateBreadcrumb(i)}
-                className={i === breadcrumbs.length - 1 ? 'font-medium text-zinc-900' : 'hover:text-zinc-900 transition-colors'}
+                className={i === breadcrumbs.length - 1 ? 'font-medium text-zinc-900 dark:text-zinc-100' : 'hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors'}
               >
                 {crumb.name}
               </button>
@@ -194,7 +218,7 @@ export default function FilesPage() {
 
         {loading ? (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {[...Array(6)].map((_, i) => <div key={i} className="h-20 rounded-xl bg-zinc-100 animate-pulse" />)}
+            {[...Array(6)].map((_, i) => <div key={i} className="h-20 rounded-xl bg-zinc-100 dark:bg-zinc-800 animate-pulse" />)}
           </div>
         ) : isEmpty ? (
           <div className="text-center py-16 text-zinc-400">
@@ -205,7 +229,7 @@ export default function FilesPage() {
         ) : (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
             {filteredFolders.map(folder => (
-              <Card key={folder.id} className="cursor-pointer hover:border-zinc-300 transition-colors group" onClick={() => openFolder(folder)}>
+              <Card key={folder.id} className="cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors group" onClick={() => openFolder(folder)}>
                 <CardContent className="p-4 flex items-center gap-3">
                   <FolderOpen className="h-8 w-8 text-amber-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -230,10 +254,13 @@ export default function FilesPage() {
                     <p className="text-xs text-zinc-400">{formatFileSize(item.size)} · {formatDate(item.created_at)}</p>
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                    <button onClick={() => downloadFile(item)} className="text-zinc-400 hover:text-zinc-700 p-1 rounded">
+                    <button onClick={() => viewFile(item)} className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 p-1 rounded" title="View">
+                      <Eye className="h-3.5 w-3.5" />
+                    </button>
+                    <button onClick={() => downloadFile(item)} className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 p-1 rounded" title="Download">
                       <Download className="h-3.5 w-3.5" />
                     </button>
-                    <button onClick={() => deleteFile(item)} className="text-zinc-400 hover:text-red-500 p-1 rounded">
+                    <button onClick={() => deleteFile(item)} className="text-zinc-400 hover:text-red-500 p-1 rounded" title="Delete">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -244,20 +271,13 @@ export default function FilesPage() {
         )}
       </div>
 
+      {/* New Folder Dialog */}
       <Dialog open={newFolderOpen} onOpenChange={setNewFolderOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>New Folder</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>New Folder</DialogTitle></DialogHeader>
           <div className="space-y-1.5">
             <Label>Folder Name</Label>
-            <Input
-              placeholder="My Folder"
-              value={newFolderName}
-              onChange={e => setNewFolderName(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && createFolder()}
-              autoFocus
-            />
+            <Input placeholder="My Folder" value={newFolderName} onChange={e => setNewFolderName(e.target.value)} onKeyDown={e => e.key === 'Enter' && createFolder()} autoFocus />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setNewFolderOpen(false)}>Cancel</Button>
@@ -265,6 +285,32 @@ export default function FilesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* File Viewer */}
+      {viewer && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex flex-col" onClick={() => setViewer(null)}>
+          <div className="flex items-center justify-between px-4 py-3 bg-zinc-900 flex-shrink-0" onClick={e => e.stopPropagation()}>
+            <p className="text-sm font-medium text-white truncate max-w-md">{viewer.item.name}</p>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => downloadFile(viewer.item)} className="text-white border-zinc-600 hover:bg-zinc-700 hover:text-white">
+                <Download className="h-3.5 w-3.5" /> Download
+              </Button>
+              <button onClick={() => setViewer(null)} className="p-1.5 text-zinc-400 hover:text-white transition-colors rounded">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-hidden flex items-center justify-center p-4" onClick={e => e.stopPropagation()}>
+            {viewer.item.type.startsWith('image/') ? (
+              <img src={viewer.url} alt={viewer.item.name} className="max-w-full max-h-full object-contain rounded-lg" />
+            ) : viewer.item.type === 'application/pdf' || viewer.item.type.startsWith('text/') ? (
+              <iframe src={viewer.url} className="w-full h-full rounded-lg bg-white" title={viewer.item.name} />
+            ) : viewer.item.type.startsWith('video/') ? (
+              <video src={viewer.url} controls className="max-w-full max-h-full rounded-lg" />
+            ) : null}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
