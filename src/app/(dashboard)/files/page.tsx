@@ -50,11 +50,11 @@ export default function FilesPage() {
   async function load(folderId?: string) {
     setLoading(true)
     const supabase = createClient()
+    const fq = supabase.from('file_folders').select('*').eq('company_id', company.id).order('name')
+    const iq = supabase.from('file_items').select('*').eq('company_id', company.id).order('name')
     const [fRes, iRes] = await Promise.all([
-      supabase.from('file_folders').select('*').eq('company_id', company.id)
-        .eq('parent_id', folderId ?? null as any).order('name'),
-      supabase.from('file_items').select('*').eq('company_id', company.id)
-        .eq('folder_id', folderId ?? null as any).order('name'),
+      folderId ? fq.eq('parent_id', folderId) : fq.is('parent_id', null),
+      folderId ? iq.eq('folder_id', folderId) : iq.is('folder_id', null),
     ])
     setFolders(fRes.data ?? [])
     setFiles(iRes.data ?? [])
@@ -93,7 +93,7 @@ export default function FilesPage() {
     await supabase.from('file_folders').insert({
       company_id: company.id,
       name: newFolderName.trim(),
-      parent_id: currentFolder?.id,
+      parent_id: currentFolder?.id ?? null,
       user_id: user!.id,
     } as any)
     setNewFolderName('')
@@ -118,7 +118,7 @@ export default function FilesPage() {
     if (!error) {
       await supabase.from('file_items').insert({
         company_id: company.id,
-        folder_id: currentFolder?.id,
+        folder_id: currentFolder?.id ?? null,
         name: file.name,
         size: file.size,
         type: file.type,
