@@ -11,7 +11,7 @@ import { useCompany } from '@/hooks/useCompany'
 import { createClient } from '@/lib/supabase/client'
 import { formatFileSize } from '@/lib/utils'
 import {
-  FolderOpen, FolderPlus, Upload, File, Trash2,
+  FolderOpen, FolderPlus, Upload, Trash2,
   ChevronRight, Home, Download, Search,
 } from 'lucide-react'
 import type { FileFolder, FileItem } from '@/types/database'
@@ -113,7 +113,7 @@ export default function FilesPage() {
     setUploading(true)
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    const path = `${company.id}/${currentFolder?.id ?? 'root'}/${Date.now()}-${file.name}`
+    const path = `${user!.id}/${company.id}/${currentFolder?.id ?? 'root'}/${Date.now()}-${file.name}`
     const { error } = await supabase.storage.from('files').upload(path, file)
     if (!error) {
       await supabase.from('file_items').insert({
@@ -168,7 +168,7 @@ export default function FilesPage() {
 
       <div className="p-6 space-y-4">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-1 text-sm text-zinc-500">
+        <div className="flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400">
           <button onClick={() => navigateBreadcrumb(-1)} className="flex items-center gap-1 hover:text-zinc-900 transition-colors">
             <Home className="h-3.5 w-3.5" />
             <span>All Files</span>
@@ -209,7 +209,7 @@ export default function FilesPage() {
                 <CardContent className="p-4 flex items-center gap-3">
                   <FolderOpen className="h-8 w-8 text-amber-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-zinc-900 truncate">{folder.name}</p>
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{folder.name}</p>
                     <p className="text-xs text-zinc-400">{formatDate(folder.created_at)}</p>
                   </div>
                   <button
@@ -226,7 +226,7 @@ export default function FilesPage() {
                 <CardContent className="p-4 flex items-center gap-3">
                   <span className="text-2xl flex-shrink-0">{getFileIcon(item.type)}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-zinc-900 truncate">{item.name}</p>
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">{item.name}</p>
                     <p className="text-xs text-zinc-400">{formatFileSize(item.size)} · {formatDate(item.created_at)}</p>
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">

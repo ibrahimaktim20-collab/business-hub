@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
-  LayoutDashboard, CheckSquare, FileText, Users,
+  LayoutDashboard, CheckSquare,
   Key, FolderOpen, LogOut, ChevronDown, Plus, Trash2, Check, Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -21,8 +21,6 @@ import { Button } from '@/components/ui/button'
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },
-  { href: '/invoices', label: 'Invoices', icon: FileText },
-  { href: '/customers', label: 'Customers', icon: Users },
   { href: '/passwords', label: 'Passwords', icon: Key },
   { href: '/files', label: 'Files', icon: FolderOpen },
   { href: '/settings', label: 'Settings', icon: Settings },

@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useCompany } from '@/hooks/useCompany'
 import { createClient } from '@/lib/supabase/client'
 import { formatDate, cn } from '@/lib/utils'
-import { Plus, Clock, Pencil, Trash2, CheckCircle2, Circle, Loader, Search, Filter } from 'lucide-react'
+import { Plus, Clock, Pencil, Trash2, CheckCircle2, Circle, Loader, Search } from 'lucide-react'
 import type { Task } from '@/types/database'
 
 type Status = Task['status']
@@ -111,14 +111,14 @@ export default function TasksPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
             <Input placeholder="Search tasks…" className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <div className="flex gap-1.5 p-1 bg-white rounded-lg border border-zinc-200">
+          <div className="flex gap-1.5 p-1 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-700">
             {(['all', 'todo', 'in_progress', 'done'] as const).map(s => (
               <button
                 key={s}
                 onClick={() => setFilterStatus(s)}
                 className={cn(
                   'px-3 py-1 rounded-md text-xs font-medium transition-colors',
-                  filterStatus === s ? 'bg-zinc-900 text-white' : 'text-zinc-500 hover:text-zinc-900'
+                  filterStatus === s ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
                 )}
               >
                 {s === 'all' ? 'All' : STATUS_LABELS[s]}
@@ -145,7 +145,7 @@ export default function TasksPage() {
                 <div key={status}>
                   <div className="flex items-center gap-2 mb-3">
                     <Icon className={cn('h-4 w-4', status === 'done' ? 'text-emerald-500' : status === 'in_progress' ? 'text-blue-500' : 'text-zinc-400')} />
-                    <h2 className="text-sm font-semibold text-zinc-700">{STATUS_LABELS[status]}</h2>
+                    <h2 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{STATUS_LABELS[status]}</h2>
                     <span className="text-xs text-zinc-400">({group.length})</span>
                   </div>
                   <div className="grid gap-2">
@@ -157,7 +157,7 @@ export default function TasksPage() {
                               <Icon className={cn('h-5 w-5', task.status === 'done' && 'text-emerald-500', task.status === 'in_progress' && 'text-blue-500')} />
                             </button>
                             <div className="flex-1 min-w-0">
-                              <p className={cn('text-sm font-medium text-zinc-900', task.status === 'done' && 'line-through text-zinc-400')}>{task.title}</p>
+                              <p className={cn('text-sm font-medium text-zinc-900 dark:text-zinc-100', task.status === 'done' && 'line-through text-zinc-400')}>{task.title}</p>
                               {task.description && <p className="text-xs text-zinc-500 mt-0.5 truncate">{task.description}</p>}
                               {task.due_date && (
                                 <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1">
