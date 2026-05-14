@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { MobileNav } from '@/components/layout/MobileNav'
 import { MobileHeader } from '@/components/layout/MobileHeader'
+import { ServiceWorkerRegistrar } from '@/components/ServiceWorkerRegistrar'
 import { useWorkspace, WORKSPACE_COLORS } from '@/hooks/useWorkspace'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -86,6 +87,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <Sidebar />
       </div>
       <MobileHeader />
+      <ServiceWorkerRegistrar />
       <main className="md:ml-60 pb-20 md:pb-0 min-h-screen">
         {children}
       </main>

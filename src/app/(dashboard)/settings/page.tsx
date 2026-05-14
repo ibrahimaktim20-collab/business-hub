@@ -8,10 +8,11 @@ import { TopBar } from '@/components/layout/TopBar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Shield, ShieldCheck, ShieldOff, Sun, Moon, Plus, Trash2, Check } from 'lucide-react'
+import { Shield, ShieldCheck, ShieldOff, Sun, Moon, Plus, Trash2, Check, Bell, BellOff } from 'lucide-react'
 import QRCode from 'qrcode'
 
 type MfaStatus = 'loading' | 'disabled' | 'enrolling' | 'enabled'
+type NotifStatus = 'unsupported' | 'denied' | 'enabled' | 'disabled' | 'loading'
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
@@ -27,6 +28,48 @@ export default function SettingsPage() {
   const [mfaError, setMfaError] = useState('')
   const [verifying, setVerifying] = useState(false)
   const [unenrolling, setUnenrolling] = useState(false)
+
+  // Notifications
+  const [notifStatus, setNotifStatus] = useState<'unsupported' | 'denied' | 'enabled' | 'disabled' | 'loading'>('loading')
+  const [notifWorking, setNotifWorking] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator)) {
+      setNotifStatus('unsupported'); return
+    }
+    if (Notification.permission === 'denied') { setNotifStatus('denied'); return }
+    navigator.serviceWorker.ready.then(reg =>
+      reg.pushManager.getSubscription().then(sub => {
+        setNotifStatus(sub ? 'enabled' : 'disabled')
+      })
+    )
+  }, [])
+
+  async function enableNotifications() {
+    setNotifWorking(true)
+    const permission = await Notification.requestPermission()
+    if (permission !== 'granted') { setNotifStatus(permission === 'denied' ? 'denied' : 'disabled'); setNotifWorking(false); return }
+    const reg = await navigator.serviceWorker.ready
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    })
+    await fetch('/api/push', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(sub) })
+    setNotifStatus('enabled')
+    setNotifWorking(false)
+  }
+
+  async function disableNotifications() {
+    setNotifWorking(true)
+    const reg = await navigator.serviceWorker.ready
+    const sub = await reg.pushManager.getSubscription()
+    if (sub) {
+      await fetch('/api/push', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ endpoint: sub.endpoint }) })
+      await sub.unsubscribe()
+    }
+    setNotifStatus('disabled')
+    setNotifWorking(false)
+  }
 
   // New workspace form
   const [newName, setNewName] = useState('')
@@ -98,6 +141,41 @@ export default function SettingsPage() {
             <Label className="dark:text-zinc-400">Email</Label>
             <Input value={email} disabled className="text-zinc-500 dark:bg-zinc-800 dark:border-zinc-700" />
           </div>
+        </div>
+
+        {/* Notifications */}
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-1">
+            <Bell className="h-5 w-5 text-zinc-400" />
+            <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">Task reminders</h2>
+          </div>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
+            Get a push notification each morning for tasks due today or tomorrow.
+          </p>
+          {notifStatus === 'unsupported' && (
+            <p className="text-sm text-zinc-400">Not supported on this browser. Use Safari on iOS 16.4+ with the app installed.</p>
+          )}
+          {notifStatus === 'denied' && (
+            <p className="text-sm text-red-500">Notifications are blocked. Enable them in your browser / iPhone settings for this site.</p>
+          )}
+          {notifStatus === 'loading' && <p className="text-sm text-zinc-400">Checking…</p>}
+          {notifStatus === 'disabled' && (
+            <Button onClick={enableNotifications} disabled={notifWorking} variant="outline">
+              <Bell className="h-4 w-4 mr-2" />
+              {notifWorking ? 'Enabling…' : 'Enable notifications'}
+            </Button>
+          )}
+          {notifStatus === 'enabled' && (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-emerald-600 font-medium flex items-center gap-1.5">
+                <Bell className="h-4 w-4" /> Notifications on
+              </span>
+              <Button onClick={disableNotifications} disabled={notifWorking} variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                <BellOff className="h-4 w-4 mr-2" />
+                {notifWorking ? 'Disabling…' : 'Turn off'}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Appearance */}
