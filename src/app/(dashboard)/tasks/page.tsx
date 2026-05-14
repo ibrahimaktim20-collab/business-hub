@@ -24,7 +24,7 @@ const STATUS_VARIANT: Record<Status, 'secondary' | 'info' | 'success'> = { todo:
 const PRIORITY_VARIANT: Record<Priority, 'destructive' | 'warning' | 'secondary'> = { high: 'destructive', medium: 'warning', low: 'secondary' }
 const STATUS_ICON: Record<Status, React.ElementType> = { todo: Circle, in_progress: Loader, done: CheckCircle2 }
 
-const EMPTY: Partial<Task> = { title: '', description: '', status: 'todo', priority: 'medium', due_date: '' }
+const EMPTY: Partial<Task> = { title: '', description: '', status: 'todo', priority: 'medium', due_date: '', due_time: '' }
 
 export default function TasksPage() {
   const { activeCompany } = useCompany()
@@ -162,7 +162,7 @@ export default function TasksPage() {
                               {task.description && <p className="text-xs text-zinc-500 mt-0.5 break-words">{task.description}</p>}
                               {task.due_date && (
                                 <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1">
-                                  <Clock className="h-3 w-3" /> {formatDate(task.due_date)}
+                                  <Clock className="h-3 w-3" /> {formatDate(task.due_date)}{task.due_time ? ` at ${task.due_time}` : ''}
                                 </p>
                               )}
                               <div className="flex items-center gap-1.5 mt-2 flex-wrap">
@@ -225,9 +225,15 @@ export default function TasksPage() {
                 </Select>
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>Due Date</Label>
-              <Input type="date" value={form.due_date ?? ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Due Date</Label>
+                <Input type="date" value={form.due_date ?? ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Due Time</Label>
+                <Input type="time" value={form.due_time ?? ''} onChange={e => setForm(f => ({ ...f, due_time: e.target.value }))} />
+              </div>
             </div>
           </div>
           <DialogFooter>

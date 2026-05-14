@@ -17,6 +17,7 @@ export interface Task {
   status: 'todo' | 'in_progress' | 'done'
   priority: 'low' | 'medium' | 'high'
   due_date?: string
+  due_time?: string
   created_at: string
 }
 
