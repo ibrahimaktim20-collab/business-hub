@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, CheckSquare, FileText, Users,
-  Key, FolderOpen, LogOut, ChevronDown, Plus, Trash2, Check,
+  Key, FolderOpen, LogOut, ChevronDown, Plus, Trash2, Check, Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useWorkspace, WORKSPACE_COLORS } from '@/hooks/useWorkspace'
@@ -25,6 +25,7 @@ const navItems = [
   { href: '/customers', label: 'Customers', icon: Users },
   { href: '/passwords', label: 'Passwords', icon: Key },
   { href: '/files', label: 'Files', icon: FolderOpen },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
 export function Sidebar() {

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, CheckSquare, FileText, Users, Key, FolderOpen } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, FileText, Users, Key, FolderOpen, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -12,6 +12,7 @@ const navItems = [
   { href: '/customers', label: 'Clients', icon: Users },
   { href: '/passwords', label: 'Passwords', icon: Key },
   { href: '/files', label: 'Files', icon: FolderOpen },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
 export function MobileNav() {
