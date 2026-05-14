@@ -83,16 +83,14 @@ export default function DashboardPage() {
               ) : (
                 <div className="space-y-2">
                   {tasks.map(task => (
-                    <div key={task.id} className="flex items-start gap-3 p-2.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate ${task.status === 'done' ? 'line-through opacity-50' : ''}`}>{task.title}</p>
+                    <div key={task.id} className="p-2.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+                      <p className={`text-sm font-medium text-zinc-900 dark:text-zinc-100 break-words ${task.status === 'done' ? 'line-through opacity-50' : ''}`}>{task.title}</p>
+                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                         {task.due_date && (
-                          <p className="text-xs text-zinc-400 flex items-center gap-1 mt-0.5">
+                          <p className="text-xs text-zinc-400 flex items-center gap-1">
                             <Clock className="h-3 w-3" /> {formatDate(task.due_date)}
                           </p>
                         )}
-                      </div>
-                      <div className="flex gap-1.5 flex-shrink-0">
                         <Badge variant={STATUS_VARIANT[task.status]}>{task.status.replace('_', ' ')}</Badge>
                         <Badge variant={PRIORITY_VARIANT[task.priority]}>{task.priority}</Badge>
                       </div>

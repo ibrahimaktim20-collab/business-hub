@@ -168,7 +168,12 @@ export default function FilesPage() {
       window.open(`https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`, '_blank')
       return
     }
-    if (item.type.startsWith('image/') || item.type === 'application/pdf' || item.type.startsWith('text/') || item.type.startsWith('video/')) {
+    // PDFs open in new tab — iOS Safari doesn't support PDF iframes
+    if (item.type === 'application/pdf') {
+      window.open(url, '_blank')
+      return
+    }
+    if (item.type.startsWith('image/') || item.type.startsWith('text/') || item.type.startsWith('video/')) {
       setViewer({ item, url })
       return
     }
@@ -303,10 +308,10 @@ export default function FilesPage() {
           <div className="flex-1 overflow-hidden flex items-center justify-center p-4" onClick={e => e.stopPropagation()}>
             {viewer.item.type.startsWith('image/') ? (
               <img src={viewer.url} alt={viewer.item.name} className="max-w-full max-h-full object-contain rounded-lg" />
-            ) : viewer.item.type === 'application/pdf' || viewer.item.type.startsWith('text/') ? (
-              <iframe src={viewer.url} className="w-full h-full rounded-lg bg-white" title={viewer.item.name} />
             ) : viewer.item.type.startsWith('video/') ? (
               <video src={viewer.url} controls className="max-w-full max-h-full rounded-lg" />
+            ) : viewer.item.type.startsWith('text/') ? (
+              <iframe src={viewer.url} className="w-full h-full rounded-lg bg-white" title={viewer.item.name} />
             ) : null}
           </div>
         </div>
