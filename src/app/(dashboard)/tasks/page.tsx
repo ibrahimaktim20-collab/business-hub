@@ -20,6 +20,7 @@ type Status = Task['status']
 type Priority = Task['priority']
 
 const STATUS_LABELS: Record<Status, string> = { todo: 'To Do', in_progress: 'In Progress', done: 'Done' }
+const STATUS_VARIANT: Record<Status, 'secondary' | 'info' | 'success'> = { todo: 'secondary', in_progress: 'info', done: 'success' }
 const PRIORITY_VARIANT: Record<Priority, 'destructive' | 'warning' | 'secondary'> = { high: 'destructive', medium: 'warning', low: 'secondary' }
 const STATUS_ICON: Record<Status, React.ElementType> = { todo: Circle, in_progress: Loader, done: CheckCircle2 }
 
@@ -150,25 +151,28 @@ export default function TasksPage() {
                   </div>
                   <div className="grid gap-2">
                     {group.map(task => (
-                      <Card key={task.id} className={cn('transition-opacity', task.status === 'done' && 'opacity-60')}>
+                      <Card key={task.id} className={cn('transition-opacity overflow-hidden', task.status === 'done' && 'opacity-60')}>
                         <CardContent className="p-3">
                           <div className="flex items-start gap-3">
                             <button onClick={() => toggleStatus(task)} className="mt-0.5 flex-shrink-0 text-zinc-300 hover:text-zinc-600 transition-colors">
                               <Icon className={cn('h-5 w-5', task.status === 'done' && 'text-emerald-500', task.status === 'in_progress' && 'text-blue-500')} />
                             </button>
                             <div className="flex-1 min-w-0">
-                              <p className={cn('text-sm font-medium text-zinc-900 dark:text-zinc-100', task.status === 'done' && 'line-through text-zinc-400')}>{task.title}</p>
-                              {task.description && <p className="text-xs text-zinc-500 mt-0.5 truncate">{task.description}</p>}
+                              <p className={cn('text-sm font-medium text-zinc-900 dark:text-zinc-100 break-words', task.status === 'done' && 'line-through text-zinc-400')}>{task.title}</p>
+                              {task.description && <p className="text-xs text-zinc-500 mt-0.5 break-words">{task.description}</p>}
                               {task.due_date && (
                                 <p className="text-xs text-zinc-400 mt-1 flex items-center gap-1">
                                   <Clock className="h-3 w-3" /> {formatDate(task.due_date)}
                                 </p>
                               )}
-                            </div>
-                            <div className="flex items-center gap-1.5 flex-shrink-0">
-                              <Badge variant={PRIORITY_VARIANT[task.priority]}>{task.priority}</Badge>
-                              <Button size="icon-sm" variant="ghost" onClick={() => openEdit(task)}><Pencil className="h-3.5 w-3.5" /></Button>
-                              <Button size="icon-sm" variant="ghost" onClick={() => handleDelete(task.id)} className="text-zinc-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></Button>
+                              <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                                <Badge variant={PRIORITY_VARIANT[task.priority]}>{task.priority}</Badge>
+                                <Badge variant={STATUS_VARIANT[task.status]}>{STATUS_LABELS[task.status]}</Badge>
+                                <div className="ml-auto flex gap-1">
+                                  <Button size="icon-sm" variant="ghost" onClick={() => openEdit(task)}><Pencil className="h-3.5 w-3.5" /></Button>
+                                  <Button size="icon-sm" variant="ghost" onClick={() => handleDelete(task.id)} className="text-zinc-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></Button>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </CardContent>

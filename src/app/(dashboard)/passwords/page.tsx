@@ -120,36 +120,38 @@ export default function PasswordsPage() {
               const isVisible = visibleIds.has(entry.id)
               const isCopied = copiedId === entry.id
               return (
-                <Card key={entry.id}>
+                <Card key={entry.id} className="overflow-hidden">
                   <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 flex-shrink-0">
-                        <Key className="h-5 w-5 text-zinc-500" />
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 flex-shrink-0">
+                        <Key className="h-4 w-4 text-zinc-500" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-zinc-900">{entry.site_name}</p>
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 break-words">{entry.site_name}</p>
                         <p className="text-xs text-zinc-500 truncate">{entry.username}</p>
                         {entry.url && (
-                          <a href={entry.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 flex items-center gap-1 mt-0.5 hover:underline">
-                            <Globe className="h-3 w-3" />{entry.url}
+                          <a href={entry.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 flex items-center gap-1 mt-0.5 hover:underline truncate">
+                            <Globe className="h-3 w-3 flex-shrink-0" /><span className="truncate">{entry.url}</span>
                           </a>
                         )}
-                      </div>
-                      <div className="flex items-center gap-1 font-mono text-sm text-zinc-700 flex-shrink-0">
-                        <span>{isVisible ? entry.password : '••••••••'}</span>
-                      </div>
-                      <div className="flex gap-1 flex-shrink-0">
-                        <Button size="icon-sm" variant="ghost" onClick={() => toggleVisible(entry.id)} title={isVisible ? 'Hide' : 'Show'}>
-                          {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                        </Button>
-                        <Button size="icon-sm" variant="ghost" onClick={() => copyPassword(entry)} title="Copy password">
-                          {isCopied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
-                        </Button>
-                        <Button size="icon-sm" variant="ghost" onClick={() => openEdit(entry)}><Pencil className="h-3.5 w-3.5" /></Button>
-                        <Button size="icon-sm" variant="ghost" onClick={() => handleDelete(entry.id)} className="text-zinc-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></Button>
+                        <div className="flex items-center justify-between mt-2 gap-2 flex-wrap">
+                          <span className="font-mono text-sm text-zinc-700 dark:text-zinc-300">
+                            {isVisible ? entry.password : '••••••••'}
+                          </span>
+                          <div className="flex gap-1 flex-shrink-0">
+                            <Button size="icon-sm" variant="ghost" onClick={() => toggleVisible(entry.id)} title={isVisible ? 'Hide' : 'Show'}>
+                              {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                            </Button>
+                            <Button size="icon-sm" variant="ghost" onClick={() => copyPassword(entry)} title="Copy password">
+                              {isCopied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                            </Button>
+                            <Button size="icon-sm" variant="ghost" onClick={() => openEdit(entry)}><Pencil className="h-3.5 w-3.5" /></Button>
+                            <Button size="icon-sm" variant="ghost" onClick={() => handleDelete(entry.id)} className="text-zinc-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></Button>
+                          </div>
+                        </div>
+                        {entry.notes && <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800 break-words">{entry.notes}</p>}
                       </div>
                     </div>
-                    {entry.notes && <p className="text-xs text-zinc-400 mt-3 border-t border-zinc-100 pt-2">{entry.notes}</p>}
                   </CardContent>
                 </Card>
               )
