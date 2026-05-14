@@ -58,9 +58,9 @@ export function Sidebar() {
 
   return (
     <>
-      <aside className="flex h-screen w-60 flex-col border-r border-zinc-200 bg-white fixed left-0 top-0 z-40">
+      <aside className="flex h-screen w-60 flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 fixed left-0 top-0 z-40">
         {/* Workspace switcher */}
-        <div className="p-3 border-b border-zinc-100">
+        <div className="p-3 border-b border-zinc-100 dark:border-zinc-800">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="w-full flex items-center gap-3 rounded-xl p-2.5 hover:bg-zinc-50 transition-colors text-left group">
@@ -121,8 +121,8 @@ export function Sidebar() {
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-zinc-900 text-white'
-                    : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
+                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100'
                 )}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
@@ -133,7 +133,7 @@ export function Sidebar() {
         </nav>
 
         {/* Sign out */}
-        <div className="p-3 border-t border-zinc-100">
+        <div className="p-3 border-t border-zinc-100 dark:border-zinc-800">
           <button
             onClick={handleSignOut}
             disabled={signingOut}

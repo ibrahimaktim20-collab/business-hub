@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { MobileNav } from '@/components/layout/MobileNav'
+import { MobileHeader } from '@/components/layout/MobileHeader'
 import { useWorkspace, WORKSPACE_COLORS } from '@/hooks/useWorkspace'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -80,10 +81,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <div className="hidden md:block">
         <Sidebar />
       </div>
+      <MobileHeader />
       <main className="md:ml-60 pb-20 md:pb-0 min-h-screen">
         {children}
       </main>
