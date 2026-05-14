@@ -2,13 +2,15 @@ import { createClient } from '@supabase/supabase-js'
 import webpush from 'web-push'
 import { NextResponse } from 'next/server'
 
-webpush.setVapidDetails(
-  process.env.VAPID_EMAIL!,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
+  webpush.setVapidDetails(
+    process.env.VAPID_EMAIL!,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  )
   if (request.headers.get('x-cron-secret') !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
